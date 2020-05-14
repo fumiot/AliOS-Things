@@ -37,11 +37,13 @@ typedef enum {
  * Use "GLOBAL_DEFINES += SENSIRION_SHT30_PORT=2" in a Makefile to override
 */
 #ifndef SENSIRION_SHT30_PORT
-#define SENSIRION_SHT30_PORT 3
+#define SENSIRION_SHT30_PORT 1
 #endif /* SENSIRION_SHT30_PORT */
 
 i2c_dev_t sht30_ctx = {
-    .port = SENSIRION_SHT30_PORT,
+    .port = 1,
+    .config.address_width = 0, //8bit
+    .config.freq          = 100000, //100KHz
     .config.dev_addr = SHT30_I2C_ADDR,
 };
 
@@ -331,6 +333,11 @@ int drv_humi_sensirion_sht30_init(void)
         sensor_humi.irq_handle = drv_humi_sensirion_sht30_irq_handle;
 
         ret = sensor_create_obj(&sensor_humi);
+        if (unlikely(ret)) {
+            return -1;
+        }
+
+        ret = hal_i2c_init(&sht30_ctx); 
         if (unlikely(ret)) {
             return -1;
         }
